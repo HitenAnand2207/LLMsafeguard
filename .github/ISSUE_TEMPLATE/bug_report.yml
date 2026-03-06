@@ -1,0 +1,93 @@
+name: Bug report
+description: Something is broken or not working as expected.
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug.
+
+        Please do not include secrets (API keys, tokens, passwords) in this issue.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What went wrong? What did you expect instead?
+      placeholder: "Example: /v1/chat/completions returns 500 when block_on_injection=true"
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Clear steps that someone else can follow to reproduce.
+      placeholder: |
+        1. Start backend with ...
+        2. Send this request ...
+        3. See error ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: "Example: Request should return 200 with a sanitized prompt forwarded to Groq"
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      placeholder: "Example: Returns 500 with stack trace ... "
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs and screenshots (optional)
+      description: Paste relevant logs (redact sensitive values). Screenshots are welcome.
+      render: text
+    validations:
+      required: false
+
+  - type: dropdown
+    id: run_mode
+    attributes:
+      label: How are you running the project?
+      options:
+        - Local (Python + Node)
+        - Docker Compose
+        - Other (please explain below)
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Provide version info so we can reproduce.
+      placeholder: |
+        OS:
+        Python:
+        Node:
+        Docker (if used):
+        Provider (Groq/local/other):
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I verified this is not a duplicate issue.
+          required: true
+        - label: I removed or redacted any secrets from logs/config.
+          required: true
+

@@ -1,0 +1,66 @@
+name: Feature request
+description: Suggest an idea or improvement.
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement.
+
+        A good feature request explains the problem first (not just the solution).
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: What problem are you facing, and who does it affect?
+      placeholder: "Example: Teams need persistent audit logs for compliance; in-memory logs reset on restart."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What do you want to happen?
+      placeholder: "Example: Add a PostgreSQL log store with a simple migration and config via env vars."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      placeholder: "Example: Write logs to a JSON file; send logs to an external SIEM."
+    validations:
+      required: false
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples or references
+      description: Links to similar projects, APIs, or design references (optional).
+      placeholder: "Example: Link to an existing open-source proxy or policy engine."
+    validations:
+      required: false
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - Small (good first issue)
+        - Medium
+        - Large / needs design discussion
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: willingness
+    attributes:
+      label: Contribution
+      options:
+        - label: I am willing to work on this (or submit a draft PR).
+          required: false
+

@@ -1,0 +1,4 @@
+# Dev/test tooling (not required to run the guard in production)
+pytest==8.3.5
+ruff==0.9.10
+
