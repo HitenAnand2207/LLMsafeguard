@@ -233,30 +233,44 @@ Get guard statistics (total, redacted, blocked, safe).
 sovereign-llm-guard/
 │
 ├── backend/
-│   ├── main.py                    # FastAPI entry point
+│   ├── main.py                         # FastAPI entry point
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   ├── requirements-dev.txt
+│   ├── test_groq.py                    # Groq integration smoke test
+│   ├── .env                            # Local secrets (not committed)
 │   ├── proxy/
-│   │   ├── router.py              # Core proxy & forwarding logic
-│   │   └── logs.py                # In-memory audit log store
+│   │   ├── __init__.py
+│   │   ├── router.py                   # Core proxy & forwarding logic
+│   │   └── logs.py                     # In-memory audit log store
 │   ├── detectors/
-│   │   ├── pii_detector.py        # 9 types of PII detection
-│   │   └── injection_detector.py  # 6 categories of injection detection
-│   ├── providers/
-│   │   └── groq_provider.py       # Groq API integration
-│   └── requirements.txt
+│   │   ├── __init__.py
+│   │   ├── pii_detector.py             # 9 types of PII detection
+│   │   ├── injection_detector.py       # 6 categories of injection detection
+│   │   └── confidential_detector.py    # Proprietary content flagging
+│   └── providers/
+│       ├── __init__.py
+│       └── groq_provider.py            # Groq API integration
 │
 ├── frontend/
-│   └── src/App.jsx                # Real-time dashboard
+│   ├── index.html
+│   ├── package.json
+│   ├── vite.config.js
+│   └── src/
+│       ├── App.jsx                     # Real-time dashboard
+│       └── main.jsx
 │
 ├── examples/
-│   └── python_client.py           # Demo client
+│   └── python_client.py               # Demo client
 │
-├── docs/
-│   ├── architecture.md
-│   ├── threat-model.md
-│   └── roadmap.md
+├── docs/                              # Extended documentation (in progress)
 │
 ├── docker-compose.yml
 ├── CONTRIBUTING.md
+├── CODE_OF_CONDUCT.md
+├── SECURITY.md
+├── ROADMAP.md
+├── LICENSE
 └── README.md
 ```
 
