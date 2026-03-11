@@ -5,7 +5,7 @@ Groq supports: llama-3.3-70b-versatile, llama3-70b-8192, mixtral-8x7b-32768, gem
 
 import httpx
 import os
-from typing import List, Dict, Optional
+from typing import List, Dict
 from dotenv import load_dotenv
 
 # Load .env file — must happen before reading env vars
@@ -18,7 +18,7 @@ async def call_groq(
     messages: List[Dict],
     model: str = "llama-3.3-70b-versatile",
     temperature: float = 0.7,
-    max_tokens: int = 1024
+    max_tokens: int = 1024,
 ) -> Dict:
     """
     Forward sanitized messages to Groq and return response.
@@ -35,17 +35,26 @@ async def call_groq(
 
     headers = {
         "Authorization": f"Bearer {GROQ_API_KEY}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
     }
 
     payload = {
         "model": model,
         "messages": messages,
         "temperature": temperature,
-        "max_tokens": max_tokens
+        "max_tokens": max_tokens,
     }
 
     async with httpx.AsyncClient(timeout=30.0) as client:
-        response = await client.post(GROQ_API_URL, json=payload, headers=headers)
-        response.raise_for_status()
-        return response.json()
+        try:
+            response = await client.post(GROQ_API_URL, json=payload, headers=headers)
+            response.raise_for_status()
+            return response.json()
+        except httpx.TimeoutException as exc:
+            raise RuntimeError("Groq API request timed out") from exc
+        except httpx.HTTPStatusError as exc:
+            status = exc.response.status_code
+            detail = exc.response.text[:400]
+            raise RuntimeError(f"Groq API returned {status}: {detail}") from exc
+        except httpx.RequestError as exc:
+            raise RuntimeError(f"Failed to reach Groq API: {exc}") from exc

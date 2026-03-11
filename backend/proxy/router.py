@@ -2,9 +2,9 @@
 Proxy Router — intercepts requests, runs detection, forwards safe prompts to Groq
 """
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List
 import time
 import uuid
@@ -13,21 +13,28 @@ from detectors.pii_detector import detect_and_redact_pii
 from detectors.injection_detector import detect_injection
 from detectors.confidential_detector import detect_confidential
 from providers.groq_provider import call_groq
-from proxy.logs import log_store
+from proxy.logs import append_log, log_store
 
 router = APIRouter()
 
 
 class Message(BaseModel):
-    role: str
-    content: str
+    role: str = Field(pattern=r"^(system|user|assistant|tool)$")
+    content: str = Field(min_length=1, max_length=20000)
+
+    @field_validator("content")
+    @classmethod
+    def content_must_not_be_blank(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("message content cannot be blank")
+        return value
 
 
 class ChatRequest(BaseModel):
-    model: Optional[str] = "llama-3.3-70b-versatile"
-    messages: List[Message]
-    temperature: Optional[float] = 0.7
-    max_tokens: Optional[int] = 1024
+    model: Optional[str] = Field(default="llama-3.3-70b-versatile", max_length=128)
+    messages: List[Message] = Field(min_length=1)
+    temperature: Optional[float] = Field(default=0.7, ge=0.0, le=2.0)
+    max_tokens: Optional[int] = Field(default=1024, ge=1, le=8192)
     block_on_injection: Optional[bool] = True  # block prompt injections (default: on)
     block_on_confidential: Optional[bool] = (
         False  # block confidential content (default: warn only)
@@ -35,8 +42,15 @@ class ChatRequest(BaseModel):
 
 
 class SimplePromptRequest(BaseModel):
-    prompt: str
-    model: Optional[str] = "llama-3.3-70b-versatile"
+    prompt: str = Field(min_length=1, max_length=20000)
+    model: Optional[str] = Field(default="llama-3.3-70b-versatile", max_length=128)
+
+    @field_validator("prompt")
+    @classmethod
+    def prompt_must_not_be_blank(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("prompt cannot be blank")
+        return value
 
 
 @router.post("/v1/chat/completions")
@@ -46,8 +60,6 @@ async def chat_completions(request: ChatRequest):
     Intercepts, sanitizes, then forwards to Groq.
     """
     request_id = str(uuid.uuid4())[:8]
-    start_time = time.time()
-
     # Process each message
     sanitized_messages = []
     pii_detected = False
@@ -94,7 +106,7 @@ async def chat_completions(request: ChatRequest):
             sanitized_messages.append({"role": msg.role, "content": msg.content})
 
     # Extract only user messages for the log (skip system prompt)
-    user_original = [m.dict() for m in request.messages if m.role == "user"]
+    user_original = [m.model_dump() for m in request.messages if m.role == "user"]
     user_sanitized = [m for m in sanitized_messages if m["role"] == "user"]
 
     # Log the request
@@ -113,7 +125,7 @@ async def chat_completions(request: ChatRequest):
         "block_reason": block_reason,
         "model": request.model,
     }
-    log_store.append(log_entry)
+    append_log(log_entry)
 
     # Block if injection or confidential content triggered a block
     if blocked:
@@ -165,7 +177,7 @@ async def inspect_only(request: SimplePromptRequest):
 
     blocked = injection["detected"]  # inspect always treats injection as blocked
 
-    log_store.append(
+    append_log(
         {
             "id": request_id,
             "timestamp": time.time(),
