@@ -7,7 +7,7 @@
 <p align="center">
   <a href="#license"><img alt="license" src="https://img.shields.io/badge/license-Apache--2.0-blue" /></a>
   <img alt="version" src="https://img.shields.io/badge/version-1.0.0-informational" />
-  <img alt="python" src="https://img.shields.io/badge/python-3.11%2B-3776AB" />
+  <img alt="python" src="https://img.shields.io/badge/python-3.10-3776AB" />
   <img alt="fastapi" src="https://img.shields.io/badge/fastapi-0.110.0-009688" />
   <img alt="react" src="https://img.shields.io/badge/react-18.2.0-61DAFB" />
   <img alt="vite" src="https://img.shields.io/badge/vite-5.1.4-646CFF" />
@@ -106,21 +106,16 @@ git clone https://github.com/YOUR_USERNAME/sovereign-llm-guard
 cd sovereign-llm-guard
 ```
 
-### 2) Start the backend (local Python)
+### 2) Configure environment
 
 ```bash
-cd backend
-pip install -r requirements.txt
-```
+# macOS/Linux
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
 
-Create a local env file:
-
-```bash
-# macOS/Linux:
-cp .env.example .env
-
-# Windows PowerShell:
-Copy-Item .env.example .env
+# Windows PowerShell
+Copy-Item backend/.env.example backend/.env
+Copy-Item frontend/.env.example frontend/.env
 ```
 
 Edit `backend/.env` and set:
@@ -129,12 +124,19 @@ Edit `backend/.env` and set:
 GROQ_API_KEY=your_key_here
 ```
 
+### 3) Start the backend (local Python)
+
 ```bash
+# Required: Python 3.10
+cd backend
+pip install -r requirements.txt
 python main.py
 # Backend at http://localhost:8000 (Swagger docs at /docs)
 ```
 
-### 3) Start the dashboard (optional)
+Note: The backend enforces Python 3.10 at startup and exits if another Python version is used.
+
+### 4) Start the dashboard
 
 ```bash
 cd ../frontend
@@ -143,7 +145,7 @@ npm run dev
 # Dashboard at http://localhost:3000
 ```
 
-### 4) Point your app at the Guard
+### 5) Point your app at the Guard
 
 ```python
 # Before (no guardrails):
@@ -154,6 +156,22 @@ base_url = "http://localhost:8000"
 ```
 
 That is all you need. The proxy will inspect and sanitize before forwarding.
+
+### Optional: run with Docker Compose
+
+```bash
+# macOS/Linux
+cp .env.example .env
+
+# Windows PowerShell
+Copy-Item .env.example .env
+
+# Edit .env and set GROQ_API_KEY, then run:
+docker compose up --build
+```
+
+- Backend: http://localhost:8000
+- Frontend: http://localhost:3000
 
 ---
 
@@ -219,8 +237,11 @@ Response:
 }
 ```
 
-### `GET /logs`
-Get all intercepted request logs.
+### `GET /logs?limit=100&offset=0`
+Get paginated intercepted request logs (newest first).
+
+### `DELETE /logs`
+Clear all in-memory logs.
 
 ### `GET /stats`
 Get guard statistics (total, redacted, blocked, safe).
@@ -238,7 +259,10 @@ sovereign-llm-guard/
 │   ├── requirements.txt
 │   ├── requirements-dev.txt
 │   ├── test_groq.py                    # Groq integration smoke test
+│   ├── tests/
+│   │   └── test_api.py                 # API tests for guard behavior
 │   ├── .env                            # Local secrets (not committed)
+│   ├── .env.example                    # Backend environment template
 │   ├── proxy/
 │   │   ├── __init__.py
 │   │   ├── router.py                   # Core proxy & forwarding logic
@@ -254,8 +278,11 @@ sovereign-llm-guard/
 │
 ├── frontend/
 │   ├── index.html
+│   ├── Dockerfile
+│   ├── nginx.conf
 │   ├── package.json
 │   ├── vite.config.js
+│   ├── .env.example                    # Frontend environment template
 │   └── src/
 │       ├── App.jsx                     # Real-time dashboard
 │       └── main.jsx
@@ -266,6 +293,7 @@ sovereign-llm-guard/
 ├── docs/                              # Extended documentation (in progress)
 │
 ├── docker-compose.yml
+├── .env.example
 ├── CONTRIBUTING.md
 ├── CODE_OF_CONDUCT.md
 ├── SECURITY.md
