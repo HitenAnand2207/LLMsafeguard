@@ -13,7 +13,7 @@ from detectors.pii_detector import detect_and_redact_pii
 from detectors.injection_detector import detect_injection
 from detectors.confidential_detector import detect_confidential
 from providers.groq_provider import call_groq
-from proxy.logs import append_log, log_store
+from proxy.logs import append_log, update_latest_log
 
 router = APIRouter()
 
@@ -154,11 +154,10 @@ async def chat_completions(request: ChatRequest):
             temperature=request.temperature,
             max_tokens=request.max_tokens,
         )
-        log_store[-1]["status"] = "success"
+        update_latest_log({"status": "success"})
         return groq_response
     except Exception as e:
-        log_store[-1]["status"] = "error"
-        log_store[-1]["error"] = str(e)
+        update_latest_log({"status": "error", "error": str(e)})
         raise HTTPException(status_code=502, detail=f"LLM provider error: {str(e)}")
 
 
