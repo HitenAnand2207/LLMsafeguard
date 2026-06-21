@@ -14,6 +14,10 @@
   <img alt="docker" src="https://img.shields.io/badge/docker-compose-2496ED" />
 </p>
 
+<p align="center">
+  Security-first LLM proxy with a standout operator dashboard for live telemetry, request inspection, and fast risk triage.
+</p>
+
 ---
 
 ## The problem (in plain language)
@@ -43,6 +47,13 @@ This is not a theoretical risk. A few public examples:
   Reference: [OpenAI post](https://openai.com/research/march-20-chatgpt-outage)
 
 Sovereign-LLM-Guard focuses on what teams most commonly leak in prompts (PII, credentials/secrets in text) and on blocking common prompt-injection patterns. It also gives you an audit trail so you can see what is being sent.
+
+## What makes it stand out
+
+- A live dashboard that surfaces blocked requests, redactions, and safe traffic at a glance.
+- A prompt lab for testing risky inputs before they reach the model.
+- Searchable request logs with a detail pane for audit and review.
+- A clean proxy workflow that keeps the backend behavior simple while making the UI feel like a real control plane.
 
 ### A concrete example (before vs after)
 
@@ -144,6 +155,8 @@ npm install
 npm run dev
 # Dashboard at http://localhost:3000
 ```
+
+The frontend now includes a stronger command-center style layout, live posture indicators, a searchable log view, and a prompt inspection panel.
 
 ### 5) Point your app at the Guard
 
